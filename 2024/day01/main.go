@@ -68,6 +68,12 @@ func (mh *MinHeap) isEmpty() bool {
 	return mh.size == 0
 }
 
+func (mh *MinHeap) copy(d *MinHeap) {
+	d.size = mh.size
+	d.values = make([]int, d.size)
+	_ = copy(d.values, mh.values)
+}
+
 func main() {
 	var left MinHeap
 	var right MinHeap
@@ -96,16 +102,65 @@ func main() {
 		log.Fatal(err)
 	}
 
-	sum := 0
+	var left2 MinHeap
+	var right2 MinHeap
+	left.copy(&left2)
+	right.copy(&right2)
+
+	totalDiff := 0
 	for !left.isEmpty() && !right.isEmpty() {
 		v1 := left.pop()
 		v2 := right.pop()
 		diff := v1 - v2
 		if diff >= 0 {
-			sum += diff
+			totalDiff += diff
 		} else {
-			sum -= diff
+			totalDiff -= diff
 		}
 	}
-	fmt.Println(sum)
+	fmt.Println(totalDiff)
+
+	totalMatch := 0
+	var current, counter1, counter2 int
+	v1 := left2.pop()
+	v2 := right2.pop()
+
+	for !left2.isEmpty() && !right2.isEmpty() {
+		for v1 != v2 {
+			if v1 < v2 {
+				if left2.isEmpty() {
+					break
+				}
+				v1 = left2.pop()
+			} else {
+				if right2.isEmpty() {
+					break
+				}
+				v2 = right2.pop()
+			}
+		}
+		if v1 != v2 {
+			break
+		}
+
+		current = v1
+		counter1 = 0
+		counter2 = 0
+		for v1 == current || v2 == current {
+			if v1 == current {
+				counter1 += 1
+				v1 = left2.pop()
+			}
+			if v2 == current {
+				counter2 += 1
+				v2 = right2.pop()
+			}
+		}
+		totalMatch += current * counter1 * counter2
+	}
+	if v1 == v2 {
+		totalMatch += v1
+	}
+	fmt.Println(totalMatch)
+
 }
